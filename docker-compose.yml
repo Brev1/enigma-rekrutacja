@@ -1,0 +1,107 @@
+version: '3.8'
+services:
+  nginx:
+    build:
+      context: .
+    image: enigma-rekr-nginx:0.1
+    container_name: nginx-www
+    restart: always
+    volumes: 
+      - ./nginx/crispy_kitchen.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/log:/var/log/nginx
+      - ./certs/selfsigned.crt:/etc/ssl/certs/selfsigned.crt
+      - ./certs/selfsigned.key:/etc/ssl/private/selfsigned.key
+    networks:
+      - localhost
+    ports:
+      - 80:80
+      - 443:443
+
+  prometheus:
+    image: prom/prometheus:latest
+    user: root
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    container_name: prometheus
+    restart: unless-stopped
+    networks:
+      - localhost
+    ports:
+      - 9090:9090
+
+  nginx-prometheus-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: prometheus-nginx-exporter
+    restart: unless-stopped
+    env_file:
+      - .env
+    command:
+      - -nginx.scrape-uri=https://nginx-www/stub_status
+    expose: 
+      - 9113
+    networks:
+      - localhost
+    depends_on:
+      - prometheus
+
+  prometheus-nginxlog-exporter:
+    image: quay.io/martinhelmich/prometheus-nginxlog-exporter:latest
+    container_name: prometheus-nginxlog-exporter
+    restart: unless-stopped
+    volumes:
+      - ./nginx/log:/mnt/nginxlogs
+      - ./nginxlog-exporter/prometheus-nginxlog-exporter.hcl:/etc/prometheus-nginxlog-exporter.hcl
+    command:
+      - '-config-file'
+      - '/etc/prometheus-nginxlog-exporter.hcl'
+    networks:
+      - localhost
+    depends_on:
+      - prometheus
+    expose:
+      - 4040
+
+  prometheus-blackbox-exporter:
+    image: quay.io/prometheus/blackbox-exporter:latest
+    container_name: prometheus-blackbox-exporter
+    ports:
+      - '9115:9115'
+    restart: unless-stopped
+    volumes:
+      - ./blackbox:/config
+    command:
+      - '--config.file=/config/blackbox.yml'
+    networks:
+      - localhost
+
+  grafana:
+    image: grafana/grafana:latest
+    user: root
+    container_name: grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/alerting:/etc/grafana/provisioning/alerting
+    env_file:
+      - .env
+    networks:
+      - localhost
+    ports:
+      - 3000:3000
+  
+
+networks:
+    localhost:
+        name: localhost
+        external: false

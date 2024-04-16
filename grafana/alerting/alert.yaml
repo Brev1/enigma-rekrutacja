@@ -1,0 +1,192 @@
+apiVersion: 1
+groups:
+    - orgId: 1
+      name: ssl
+      folder: alert
+      interval: 1d
+      rules:
+        - uid: bdix8m9vgho1se
+          title: Certificate & Connection Monitoring
+          condition: I
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 3600
+                to: 0
+              datasourceUid: ediq3rb50xs00e
+              model:
+                datasource:
+                    type: prometheus
+                    uid: ediq3rb50xs00e
+                expr: probe_ssl_earliest_cert_expiry-time()
+                format: table
+                instant: true
+                interval: ""
+                intervalMs: 15000
+                legendFormat: ""
+                maxDataPoints: 43200
+                refId: A
+            - refId: D
+              relativeTimeRange:
+                from: 3600
+                to: 0
+              datasourceUid: ediq3rb50xs00e
+              model:
+                datasource:
+                    type: prometheus
+                    uid: ediq3rb50xs00e
+                expr: probe_http_status_code
+                format: table
+                instant: true
+                interval: ""
+                intervalMs: 15000
+                legendFormat: ""
+                maxDataPoints: 43200
+                refId: D
+            - refId: G
+              relativeTimeRange:
+                from: 3600
+                to: 0
+              datasourceUid: ediq3rb50xs00e
+              model:
+                datasource:
+                    type: prometheus
+                    uid: ediq3rb50xs00e
+                expr: probe_http_duration_seconds{phase="resolve"}
+                format: table
+                instant: true
+                interval: ""
+                intervalMs: 15000
+                legendFormat: ""
+                maxDataPoints: 43200
+                refId: G
+            - refId: B
+              relativeTimeRange:
+                from: 3600
+                to: 0
+              datasourceUid: ediq3rb50xs00e
+              model:
+                datasource:
+                    type: prometheus
+                    uid: ediq3rb50xs00e
+                expr: probe_http_duration_seconds{phase="connect"}
+                format: table
+                instant: true
+                interval: ""
+                intervalMs: 15000
+                legendFormat: ""
+                maxDataPoints: 43200
+                refId: B
+            - refId: E
+              relativeTimeRange:
+                from: 3600
+                to: 0
+              datasourceUid: ediq3rb50xs00e
+              model:
+                datasource:
+                    type: prometheus
+                    uid: ediq3rb50xs00e
+                expr: probe_http_duration_seconds{phase="tls"}
+                format: table
+                instant: true
+                interval: ""
+                intervalMs: 15000
+                legendFormat: ""
+                maxDataPoints: 43200
+                refId: E
+            - refId: F
+              relativeTimeRange:
+                from: 3600
+                to: 0
+              datasourceUid: ediq3rb50xs00e
+              model:
+                datasource:
+                    type: prometheus
+                    uid: ediq3rb50xs00e
+                expr: probe_http_duration_seconds{phase="processing"}
+                format: table
+                instant: true
+                interval: ""
+                intervalMs: 15000
+                legendFormat: ""
+                maxDataPoints: 43200
+                refId: F
+            - refId: C
+              relativeTimeRange:
+                from: 3600
+                to: 0
+              datasourceUid: ediq3rb50xs00e
+              model:
+                datasource:
+                    type: prometheus
+                    uid: ediq3rb50xs00e
+                expr: probe_http_duration_seconds{phase="transfer"}
+                format: table
+                instant: true
+                interval: ""
+                intervalMs: 15000
+                legendFormat: ""
+                maxDataPoints: 43200
+                refId: C
+            - refId: H
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - H
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: H
+                settings:
+                    mode: ""
+                type: reduce
+            - refId: I
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 2.6784e+06
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - I
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: H
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: I
+                type: threshold
+          dashboardUid: fdiwitdiy3t34b
+          panelId: 2
+          noDataState: NoData
+          execErrState: Error
+          for: 1d
+          annotations:
+            __dashboardUid__: fdiwitdiy3t34b
+            __panelId__: "2"
+          labels: {}
+          isPaused: false

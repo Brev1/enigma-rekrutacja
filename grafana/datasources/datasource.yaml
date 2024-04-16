@@ -1,0 +1,10 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    isDefault: true
+    orgId: 1
+    uid: "XCZE3g9RTg" # Do Not Delete, dashboard is using it
+    url: http://prometheus:9090
